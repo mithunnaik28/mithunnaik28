@@ -2,6 +2,7 @@
 <h1 align=center>Hi 👋, I'm Mithun A naik</h1>
 
 <h3 align=center></h3>
+<p align="left"> <img src="https://komarev.com/ghpvc/?username=mithunnaik28&label=Profile%20views&color=0e75b6&style=flat" alt="mithunnaik28" /> </p>
 
 - 📬 Email -**mithunnaik28c@gmail.com**
 
@@ -11,7 +12,6 @@
 
 <h3> 📊 GitHub Stats: </h3>
 <a href="https://git.io/streak-stats"><img src="https://github-readme-streak-stats.herokuapp.com?user=mithunnaik28&theme=dark&hide_border=true" alt="GitHub Streak" /></a>
+<img src="https://github-readme-stats.shion.dev/api/top-langs/?username=mithunnaik28&theme=dark&hide_border=true&include_all_commits=true&count_private=true&layout=compact" alt="Top Languages" />
 
-![](https://github-readme-stats.shion.dev/api/top-langs/?username=mithunnaik28&theme=dark&hide_border=true&include_all_commits=true&count_private=true&layout=compact)
-
-<p align="left"> <img src="https://komarev.com/ghpvc/?username=mithunnaik28&label=Profile%20views&color=0e75b6&style=flat" alt="mithunnaik28" /> </p>
+<h4 align=center> Thank you,🙏</h4>
