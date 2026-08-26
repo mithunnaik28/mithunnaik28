@@ -347,22 +347,28 @@ fill="#8b949e">
 
 <!-- Flame -->
 
-<g transform="translate(300 20) scale(0.7) translate(-300 -20)">
+# Crown Icon
 
 <path
 d="
-M 300 23
-C 295 16 298 9 304 3
-C 305 10 312 13 313 20
-C 315 28 309 34 302 34
-C 295 34 290 30 290 24
-C 290 19 293 15 297 11
-C 296 17 298 20 300 23
+M 286 32
+L 282 17
+L 293 23
+L 300 8
+L 307 23
+L 318 17
+L 314 32
 Z
 "
 fill="#ff8c00"/>
 
-</g>
+<rect
+x="286"
+y="32"
+width="28"
+height="5"
+rx="2"
+fill="#ff8c00"/>
 
 <!-- Current Number -->
 
