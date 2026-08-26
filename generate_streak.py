@@ -4,10 +4,18 @@ import urllib.request
 from datetime import datetime, timedelta
 
 
+# =========================
+# GitHub Username
+# =========================
+
 USERNAME = "mithunnaik28"
 
 TOKEN = os.environ["GH_TOKEN"]
 
+
+# =========================
+# GitHub GraphQL Query
+# =========================
 
 QUERY = """
 query($login: String!) {
@@ -15,6 +23,7 @@ query($login: String!) {
     contributionsCollection {
       contributionCalendar {
         totalContributions
+
         weeks {
           contributionDays {
             date
@@ -27,6 +36,10 @@ query($login: String!) {
 }
 """
 
+
+# =========================
+# Get GitHub Contributions
+# =========================
 
 def get_contributions():
 
@@ -48,17 +61,25 @@ def get_contributions():
     )
 
     with urllib.request.urlopen(request) as response:
-        result = json.loads(response.read().decode("utf-8"))
+        result = json.loads(
+            response.read().decode("utf-8")
+        )
 
     if "errors" in result:
         print(result["errors"])
-        raise Exception("GitHub API error")
+        raise Exception("GitHub API Error")
 
-    calendar = result["data"]["user"]["contributionsCollection"]["contributionCalendar"]
+    calendar = (
+        result["data"]
+        ["user"]
+        ["contributionsCollection"]
+        ["contributionCalendar"]
+    )
 
     days = []
 
     for week in calendar["weeks"]:
+
         for day in week["contributionDays"]:
 
             days.append({
@@ -73,12 +94,16 @@ def get_contributions():
     return calendar["totalContributions"], days
 
 
+# =========================
+# Calculate Streaks
+# =========================
+
 def calculate_streaks(days):
 
     days.sort(key=lambda x: x["date"])
 
     # -------------------------
-    # CURRENT STREAK
+    # Current Streak
     # -------------------------
 
     current = 0
@@ -96,15 +121,19 @@ def calculate_streaks(days):
             == days[i]["date"] - timedelta(days=1)
             and days[i - 1]["count"] > 0
         ):
+
             i -= 1
+
         else:
+
             i = -1
 
     if i >= 0 and days[i]["count"] > 0:
 
         current = 1
-        current_end = days[i]["date"]
+
         current_start = days[i]["date"]
+        current_end = days[i]["date"]
 
         i -= 1
 
@@ -117,18 +146,21 @@ def calculate_streaks(days):
             ):
 
                 current += 1
+
                 current_start = days[i]["date"]
 
                 i -= 1
 
             else:
+
                 break
 
     # -------------------------
-    # LONGEST STREAK
+    # Longest Streak
     # -------------------------
 
     longest = 0
+
     longest_start = None
     longest_end = None
 
@@ -147,6 +179,7 @@ def calculate_streaks(days):
             if temp > longest:
 
                 longest = temp
+
                 longest_start = temp_start
                 longest_end = day["date"]
 
@@ -165,6 +198,10 @@ def calculate_streaks(days):
     }
 
 
+# =========================
+# Format Date
+# =========================
+
 def format_date(date):
 
     if date is None:
@@ -173,7 +210,30 @@ def format_date(date):
     return date.strftime("%b %d")
 
 
-def create_svg(total, streak):
+# =========================
+# CREATE SVG CARD
+# =========================
+
+def create_svg(total, days, streak):
+
+    # First contribution
+    first_contribution = None
+
+    for day in days:
+
+        if day["count"] > 0:
+
+            first_contribution = day["date"]
+
+            break
+
+    if first_contribution:
+
+        first_date = first_contribution.strftime("%b %d, %Y")
+
+    else:
+
+        first_date = "-"
 
     current_dates = (
         f"{format_date(streak['current_start'])} - "
@@ -185,158 +245,255 @@ def create_svg(total, streak):
         f"{format_date(streak['longest_end'])}"
     )
 
+
+    # =========================
+    # SVG
+    # =========================
+
     svg = f'''<svg
 xmlns="http://www.w3.org/2000/svg"
-width="680"
-height="270"
-viewBox="0 0 680 270">
+width="690"
+height="275"
+viewBox="0 0 690 275">
+
+<!-- ========================= -->
+<!-- Background -->
+<!-- ========================= -->
 
 <rect
 x="0"
 y="0"
-width="680"
-height="270"
-rx="8"
-fill="white"
-stroke="#d8dee4"/>
+width="690"
+height="275"
+rx="6"
+fill="#0d1117"
+stroke="#30363d"
+stroke-width="1"/>
 
-<!-- Vertical lines -->
 
-<line
-x1="218"
-y1="35"
-x2="218"
-y2="235"
-stroke="#d8dee4"/>
+<!-- ========================= -->
+<!-- Vertical Lines -->
+<!-- ========================= -->
 
 <line
-x1="450"
+x1="230"
 y1="35"
-x2="450"
-y2="235"
-stroke="#d8dee4"/>
+x2="230"
+y2="240"
+stroke="#30363d"
+stroke-width="1"/>
+
+<line
+x1="460"
+y1="35"
+x2="460"
+y2="240"
+stroke="#30363d"
+stroke-width="1"/>
 
 
+<!-- ========================= -->
 <!-- TOTAL CONTRIBUTIONS -->
+<!-- ========================= -->
 
 <text
-x="110"
-y="110"
+x="115"
+y="112"
 text-anchor="middle"
+font-family="Arial, sans-serif"
 font-size="40"
-font-weight="bold"
-font-family="Arial"
-fill="#111">
+font-weight="700"
+fill="#ffffff">
 
 {total}
 
 </text>
 
+
 <text
-x="110"
-y="160"
+x="115"
+y="166"
 text-anchor="middle"
-font-size="18"
-font-family="Arial"
-fill="#333">
+font-family="Arial, sans-serif"
+font-size="19"
+fill="#e6edf3">
 
 Total Contributions
 
 </text>
 
 
+<text
+x="115"
+y="207"
+text-anchor="middle"
+font-family="Arial, sans-serif"
+font-size="16"
+fill="#8b949e">
+
+{first_date} - Present
+
+</text>
+
+
+<!-- ========================= -->
 <!-- CURRENT STREAK -->
+<!-- ========================= -->
+
+<g transform="translate(345,0)">
+
+
+<!-- Orange Circle -->
+
+<circle
+cx="0"
+cy="95"
+r="57"
+fill="none"
+stroke="#ff8c00"
+stroke-width="7"/>
+
+
+<!-- Flame -->
+<!-- Simple SVG Flame -->
+
+<path
+d="
+M 0 18
+C -4 9 -2 2 5 -7
+C 7 0 14 4 13 13
+C 12 22 5 27 0 27
+C -8 27 -13 22 -13 14
+C -13 8 -10 3 -6 -2
+C -7 7 -3 12 0 18
+Z
+"
+fill="#ff8c00"
+transform="translate(0,-70)"/>
+
+
+<!-- Current Number -->
 
 <text
-x="335"
-y="110"
+x="0"
+y="112"
 text-anchor="middle"
+font-family="Arial, sans-serif"
 font-size="40"
-font-weight="bold"
-font-family="Arial"
-fill="#111">
+font-weight="700"
+fill="#ffffff">
 
 {streak["current"]}
 
 </text>
 
+
+<!-- Current Streak -->
+
 <text
-x="335"
-y="160"
+x="0"
+y="166"
 text-anchor="middle"
-font-size="18"
-font-weight="bold"
-font-family="Arial"
+font-family="Arial, sans-serif"
+font-size="19"
+font-weight="700"
 fill="#ff8c00">
 
-🔥 Current Streak
+Current Streak
 
 </text>
 
+
+<!-- Current Dates -->
+
 <text
-x="335"
-y="198"
+x="0"
+y="207"
 text-anchor="middle"
+font-family="Arial, sans-serif"
 font-size="16"
-font-family="Arial"
-fill="#666">
+fill="#8b949e">
 
 {current_dates}
 
 </text>
 
+</g>
 
+
+<!-- ========================= -->
 <!-- LONGEST STREAK -->
+<!-- ========================= -->
 
 <text
-x="565"
-y="110"
+x="575"
+y="112"
 text-anchor="middle"
+font-family="Arial, sans-serif"
 font-size="40"
-font-weight="bold"
-font-family="Arial"
-fill="#111">
+font-weight="700"
+fill="#ffffff">
 
 {streak["longest"]}
 
 </text>
 
+
 <text
-x="565"
-y="160"
+x="575"
+y="166"
 text-anchor="middle"
-font-size="18"
-font-family="Arial"
-fill="#333">
+font-family="Arial, sans-serif"
+font-size="19"
+fill="#e6edf3">
 
 Longest Streak
 
 </text>
 
+
 <text
-x="565"
-y="198"
+x="575"
+y="207"
 text-anchor="middle"
+font-family="Arial, sans-serif"
 font-size="16"
-font-family="Arial"
-fill="#666">
+fill="#8b949e">
 
 {longest_dates}
 
 </text>
 
+
 </svg>
 '''
 
-    with open("streak.svg", "w", encoding="utf-8") as file:
+
+    # =========================
+    # Save SVG
+    # =========================
+
+    with open(
+        "streak.svg",
+        "w",
+        encoding="utf-8"
+    ) as file:
 
         file.write(svg)
 
+
+# =========================
+# RUN
+# =========================
 
 total, days = get_contributions()
 
 streak = calculate_streaks(days)
 
-create_svg(total, streak)
+create_svg(
+    total,
+    days,
+    streak
+)
 
 print("Streak SVG created successfully!")
