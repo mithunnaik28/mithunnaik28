@@ -347,6 +347,7 @@ fill="#8b949e">
 
 <!-- Flame -->
 
+<g transform="translate(0,0) scale(0.7)">
 <path
 d="
 M 300 23
@@ -358,9 +359,8 @@ C 290 19 293 15 297 11
 C 296 17 298 20 300 23
 Z
 "
-fill="#ff8c00"
-transform="translate(150 15) scale(0.8)"/>
-
+fill="#ff8c00"/>
+</g>
 
 <!-- Current Number -->
 
