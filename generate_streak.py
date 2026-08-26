@@ -216,24 +216,26 @@ def format_date(date):
 
 def create_svg(total, days, streak):
 
-    # First contribution
+    # -------------------------
+    # First contribution date
+    # -------------------------
+
     first_contribution = None
 
     for day in days:
-
         if day["count"] > 0:
-
             first_contribution = day["date"]
-
             break
 
     if first_contribution:
-
         first_date = first_contribution.strftime("%b %d, %Y")
-
     else:
-
         first_date = "-"
+
+
+    # -------------------------
+    # Dates
+    # -------------------------
 
     current_dates = (
         f"{format_date(streak['current_start'])} - "
@@ -246,48 +248,51 @@ def create_svg(total, days, streak):
     )
 
 
-    # =========================
-    # SVG
-    # =========================
+    # -------------------------
+    # SVG CARD
+    # -------------------------
 
     svg = f'''<svg
 xmlns="http://www.w3.org/2000/svg"
-width="690"
-height="275"
-viewBox="0 0 690 275">
+width="600"
+height="190"
+viewBox="0 0 600 190">
 
-<!-- ========================= -->
 <!-- Background -->
-<!-- ========================= -->
 
 <rect
 x="0"
 y="0"
-width="690"
-height="275"
-rx="6"
+width="600"
+height="190"
+rx="7"
 fill="#0d1117"
 stroke="#30363d"
 stroke-width="1"/>
 
 
 <!-- ========================= -->
-<!-- Vertical Lines -->
+<!-- DIVIDER 1 -->
 <!-- ========================= -->
 
 <line
-x1="230"
-y1="35"
-x2="230"
-y2="240"
+x1="200"
+y1="25"
+x2="200"
+y2="165"
 stroke="#30363d"
 stroke-width="1"/>
 
+
+<!-- ========================= -->
+<!-- DIVIDER 2 -->
+<!-- ========================= -->
+
 <line
-x1="460"
-y1="35"
-x2="460"
-y2="240"
+x1="400"
+y1="25"
+x2="400"
+y2="165"
 stroke="#30363d"
 stroke-width="1"/>
 
@@ -297,11 +302,11 @@ stroke-width="1"/>
 <!-- ========================= -->
 
 <text
-x="115"
-y="112"
+x="100"
+y="76"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="40"
+font-size="32"
 font-weight="700"
 fill="#ffffff">
 
@@ -311,11 +316,11 @@ fill="#ffffff">
 
 
 <text
-x="115"
-y="166"
+x="100"
+y="112"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="19"
+font-size="16"
 fill="#e6edf3">
 
 Total Contributions
@@ -324,11 +329,11 @@ Total Contributions
 
 
 <text
-x="115"
-y="207"
+x="100"
+y="143"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="16"
+font-size="13"
 fill="#8b949e">
 
 {first_date} - Present
@@ -340,46 +345,30 @@ fill="#8b949e">
 <!-- CURRENT STREAK -->
 <!-- ========================= -->
 
-<g transform="translate(345,0)">
-
-
-<!-- Orange Circle -->
-
-<circle
-cx="0"
-cy="95"
-r="57"
-fill="none"
-stroke="#ff8c00"
-stroke-width="7"/>
-
-
 <!-- Flame -->
-<!-- Simple SVG Flame -->
 
 <path
 d="
-M 0 18
-C -4 9 -2 2 5 -7
-C 7 0 14 4 13 13
-C 12 22 5 27 0 27
-C -8 27 -13 22 -13 14
-C -13 8 -10 3 -6 -2
-C -7 7 -3 12 0 18
+M 300 23
+C 295 16 298 9 304 3
+C 305 10 312 13 313 20
+C 315 28 309 34 302 34
+C 295 34 290 30 290 24
+C 290 19 293 15 297 11
+C 296 17 298 20 300 23
 Z
 "
-fill="#ff8c00"
-transform="translate(0,-70)"/>
+fill="#ff8c00"/>
 
 
 <!-- Current Number -->
 
 <text
-x="0"
-y="112"
+x="300"
+y="76"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="40"
+font-size="32"
 font-weight="700"
 fill="#ffffff">
 
@@ -391,11 +380,11 @@ fill="#ffffff">
 <!-- Current Streak -->
 
 <text
-x="0"
-y="166"
+x="300"
+y="112"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="19"
+font-size="16"
 font-weight="700"
 fill="#ff8c00">
 
@@ -407,18 +396,16 @@ Current Streak
 <!-- Current Dates -->
 
 <text
-x="0"
-y="207"
+x="300"
+y="143"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="16"
+font-size="13"
 fill="#8b949e">
 
 {current_dates}
 
 </text>
-
-</g>
 
 
 <!-- ========================= -->
@@ -426,11 +413,11 @@ fill="#8b949e">
 <!-- ========================= -->
 
 <text
-x="575"
-y="112"
+x="500"
+y="76"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="40"
+font-size="32"
 font-weight="700"
 fill="#ffffff">
 
@@ -440,11 +427,11 @@ fill="#ffffff">
 
 
 <text
-x="575"
-y="166"
+x="500"
+y="112"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="19"
+font-size="16"
 fill="#e6edf3">
 
 Longest Streak
@@ -453,11 +440,11 @@ Longest Streak
 
 
 <text
-x="575"
-y="207"
+x="500"
+y="143"
 text-anchor="middle"
 font-family="Arial, sans-serif"
-font-size="16"
+font-size="13"
 fill="#8b949e">
 
 {longest_dates}
@@ -469,9 +456,9 @@ fill="#8b949e">
 '''
 
 
-    # =========================
+    # -------------------------
     # Save SVG
-    # =========================
+    # -------------------------
 
     with open(
         "streak.svg",
@@ -480,7 +467,6 @@ fill="#8b949e">
     ) as file:
 
         file.write(svg)
-
 
 # =========================
 # RUN
