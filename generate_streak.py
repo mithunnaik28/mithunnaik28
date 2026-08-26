@@ -1,11 +1,13 @@
 import os
-import requests
+import json
+import urllib.request
 from datetime import datetime, timedelta
 
 
 USERNAME = "mithunnaik28"
 
 TOKEN = os.environ["GH_TOKEN"]
+
 
 QUERY = """
 query($login: String!) {
@@ -27,35 +29,44 @@ query($login: String!) {
 
 
 def get_contributions():
-    response = requests.post(
+
+    data = json.dumps({
+        "query": QUERY,
+        "variables": {
+            "login": USERNAME
+        }
+    }).encode("utf-8")
+
+    request = urllib.request.Request(
         "https://api.github.com/graphql",
-        json={
-            "query": QUERY,
-            "variables": {
-                "login": USERNAME
-            }
-        },
+        data=data,
         headers={
             "Authorization": f"Bearer {TOKEN}",
             "Content-Type": "application/json"
-        }
+        },
+        method="POST"
     )
 
-    response.raise_for_status()
+    with urllib.request.urlopen(request) as response:
+        result = json.loads(response.read().decode("utf-8"))
 
-    data = response.json()
+    if "errors" in result:
+        print(result["errors"])
+        raise Exception("GitHub API error")
 
-    if "errors" in data:
-        raise Exception(data["errors"])
-
-    calendar = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]
+    calendar = result["data"]["user"]["contributionsCollection"]["contributionCalendar"]
 
     days = []
 
     for week in calendar["weeks"]:
         for day in week["contributionDays"]:
+
             days.append({
-                "date": datetime.strptime(day["date"], "%Y-%m-%d").date(),
+                "date": datetime.strptime(
+                    day["date"],
+                    "%Y-%m-%d"
+                ).date(),
+
                 "count": day["contributionCount"]
             })
 
@@ -63,43 +74,60 @@ def get_contributions():
 
 
 def calculate_streaks(days):
-    days = sorted(days, key=lambda x: x["date"])
 
-    # Current streak
+    days.sort(key=lambda x: x["date"])
+
+    # -------------------------
+    # CURRENT STREAK
+    # -------------------------
+
     current = 0
     current_start = None
     current_end = None
 
-    today = days[-1]["date"]
-
-    # Start from latest day
     i = len(days) - 1
 
-    # If today has no contribution, check yesterday
+    # Latest day
     if days[i]["count"] == 0:
-        if i > 0 and days[i - 1]["date"] == today - timedelta(days=1):
+
+        if (
+            i > 0
+            and days[i - 1]["date"]
+            == days[i]["date"] - timedelta(days=1)
+            and days[i - 1]["count"] > 0
+        ):
             i -= 1
         else:
             i = -1
 
     if i >= 0 and days[i]["count"] > 0:
-        current_end = days[i]["date"]
+
         current = 1
+        current_end = days[i]["date"]
         current_start = days[i]["date"]
 
         i -= 1
 
         while i >= 0:
-            expected = days[i + 1]["date"] - timedelta(days=1)
 
-            if days[i]["date"] == expected and days[i]["count"] > 0:
+            if (
+                days[i]["date"]
+                == days[i + 1]["date"] - timedelta(days=1)
+                and days[i]["count"] > 0
+            ):
+
                 current += 1
                 current_start = days[i]["date"]
+
                 i -= 1
+
             else:
                 break
 
-    # Longest streak
+    # -------------------------
+    # LONGEST STREAK
+    # -------------------------
+
     longest = 0
     longest_start = None
     longest_end = None
@@ -107,7 +135,7 @@ def calculate_streaks(days):
     temp = 0
     temp_start = None
 
-    for i, day in enumerate(days):
+    for day in days:
 
         if day["count"] > 0:
 
@@ -117,17 +145,20 @@ def calculate_streaks(days):
             temp += 1
 
             if temp > longest:
+
                 longest = temp
                 longest_start = temp_start
                 longest_end = day["date"]
 
         else:
+
             temp = 0
 
     return {
         "current": current,
         "current_start": current_start,
         "current_end": current_end,
+
         "longest": longest,
         "longest_start": longest_start,
         "longest_end": longest_end
@@ -135,6 +166,7 @@ def calculate_streaks(days):
 
 
 def format_date(date):
+
     if date is None:
         return "-"
 
@@ -142,8 +174,6 @@ def format_date(date):
 
 
 def create_svg(total, streak):
-    width = 680
-    height = 270
 
     current_dates = (
         f"{format_date(streak['current_start'])} - "
@@ -155,73 +185,62 @@ def create_svg(total, streak):
         f"{format_date(streak['longest_end'])}"
     )
 
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg"
-width="{width}"
-height="{height}"
-viewBox="0 0 {width} {height}">
+    svg = f'''<svg
+xmlns="http://www.w3.org/2000/svg"
+width="680"
+height="270"
+viewBox="0 0 680 270">
 
 <rect
-    x="0"
-    y="0"
-    width="680"
-    height="270"
-    rx="8"
-    fill="#ffffff"
-    stroke="#d8dee4"/>
+x="0"
+y="0"
+width="680"
+height="270"
+rx="8"
+fill="white"
+stroke="#d8dee4"/>
 
-<!-- vertical lines -->
-
-<line
-    x1="218"
-    y1="35"
-    x2="218"
-    y2="235"
-    stroke="#d8dee4"/>
+<!-- Vertical lines -->
 
 <line
-    x1="450"
-    y1="35"
-    x2="450"
-    y2="235"
-    stroke="#d8dee4"/>
+x1="218"
+y1="35"
+x2="218"
+y2="235"
+stroke="#d8dee4"/>
+
+<line
+x1="450"
+y1="35"
+x2="450"
+y2="235"
+stroke="#d8dee4"/>
 
 
-<!-- TOTAL -->
+<!-- TOTAL CONTRIBUTIONS -->
 
 <text
-    x="110"
-    y="110"
-    text-anchor="middle"
-    font-size="40"
-    font-weight="bold"
-    font-family="Arial"
-    fill="#111111">
+x="110"
+y="110"
+text-anchor="middle"
+font-size="40"
+font-weight="bold"
+font-family="Arial"
+fill="#111">
 
-    {total}
+{total}
 
 </text>
 
 <text
-    x="110"
-    y="160"
-    text-anchor="middle"
-    font-size="19"
-    font-family="Arial"
-    fill="#333333">
+x="110"
+y="160"
+text-anchor="middle"
+font-size="18"
+font-family="Arial"
+fill="#333">
 
-    Total Contributions
-
-</text>
-
-<text
-    x="110"
-    y="198"
-    text-anchor="middle"
-    font-size="16"
-    font-family="Arial"
-    fill="#666666">
-
-    Contributions
+Total Contributions
 
 </text>
 
@@ -229,88 +248,89 @@ viewBox="0 0 {width} {height}">
 <!-- CURRENT STREAK -->
 
 <text
-    x="335"
-    y="112"
-    text-anchor="middle"
-    font-size="40"
-    font-weight="bold"
-    font-family="Arial"
-    fill="#111111">
+x="335"
+y="110"
+text-anchor="middle"
+font-size="40"
+font-weight="bold"
+font-family="Arial"
+fill="#111">
 
-    {streak["current"]}
-
-</text>
-
-<text
-    x="335"
-    y="160"
-    text-anchor="middle"
-    font-size="19"
-    font-weight="bold"
-    font-family="Arial"
-    fill="#ff8c00">
-
-    🔥 Current Streak
+{streak["current"]}
 
 </text>
 
 <text
-    x="335"
-    y="198"
-    text-anchor="middle"
-    font-size="16"
-    font-family="Arial"
-    fill="#666666">
+x="335"
+y="160"
+text-anchor="middle"
+font-size="18"
+font-weight="bold"
+font-family="Arial"
+fill="#ff8c00">
 
-    {current_dates}
-
-</text>
-
-
-<!-- LONGEST -->
-
-<text
-    x="565"
-    y="110"
-    text-anchor="middle"
-    font-size="40"
-    font-weight="bold"
-    font-family="Arial"
-    fill="#111111">
-
-    {streak["longest"]}
+🔥 Current Streak
 
 </text>
 
 <text
-    x="565"
-    y="160"
-    text-anchor="middle"
-    font-size="19"
-    font-family="Arial"
-    fill="#333333">
+x="335"
+y="198"
+text-anchor="middle"
+font-size="16"
+font-family="Arial"
+fill="#666">
 
-    Longest Streak
+{current_dates}
+
+</text>
+
+
+<!-- LONGEST STREAK -->
+
+<text
+x="565"
+y="110"
+text-anchor="middle"
+font-size="40"
+font-weight="bold"
+font-family="Arial"
+fill="#111">
+
+{streak["longest"]}
 
 </text>
 
 <text
-    x="565"
-    y="198"
-    text-anchor="middle"
-    font-size="16"
-    font-family="Arial"
-    fill="#666666">
+x="565"
+y="160"
+text-anchor="middle"
+font-size="18"
+font-family="Arial"
+fill="#333">
 
-    {longest_dates}
+Longest Streak
+
+</text>
+
+<text
+x="565"
+y="198"
+text-anchor="middle"
+font-size="16"
+font-family="Arial"
+fill="#666">
+
+{longest_dates}
 
 </text>
 
 </svg>
 '''
 
-    with open("streak.svg", "w", encoding="utf-8") as f:
-        f.write(svg)
+    with open("streak.svg", "w", encoding="utf-8") as file:
+
+        file.write(svg)
 
 
 total, days = get_contributions()
@@ -319,4 +339,4 @@ streak = calculate_streaks(days)
 
 create_svg(total, streak)
 
-print("Streak SVG generated successfully!")
+print("Streak SVG created successfully!")
