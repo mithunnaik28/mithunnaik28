@@ -1,32 +1,24 @@
 name: Update GitHub Streak
 
 on:
+  workflow_dispatch:
+
   schedule:
     - cron: "0 0 * * *"
-
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update-streak:
+
+  update:
 
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
 
       - name: Generate streak
         env:
@@ -34,13 +26,15 @@ jobs:
         run: |
           python generate_streak.py
 
-      - name: Commit SVG
+      - name: Save streak
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+
+          git config user.name "github-actions"
+
+          git config user.email "github-actions@github.com"
 
           git add streak.svg
 
-          git diff --cached --quiet || git commit -m "Update GitHub streak"
+          git diff --cached --quiet || git commit -m "Update streak"
 
           git push
