@@ -13,7 +13,6 @@
 <h3> 📊 GitHub Stats: </h3>
 <p><img align="center" src="https://raw.githubusercontent.com/mithunnaik28/mithunnaik28/main/streak.svg" alt="mithunnaik28" /></p>
 
-
 <img src="https://github-readme-stats.shion.dev/api/top-langs/?username=mithunnaik28&theme=dark&hide_border=true&include_all_commits=true&count_private=true&layout=compact" alt="mithunnaik28" />
 
 <h4 align=center> Thank you,🙏</h4>
