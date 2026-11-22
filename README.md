@@ -1,5 +1,5 @@
 
-<h1 align=center>Hi 👋, I'm Mithun A naik</h1>
+<h1 align=center>Hi 👋, I'm Mithun Naik</h1>
 
 <h3 align=center></h3>
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=mithunnaik28&label=Profile%20views&color=0e75b6&style=flat" alt="mithunnaik28" /> </p>
